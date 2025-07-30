@@ -5,9 +5,10 @@ const sql = require("mssql");
 const { Connector } = require("@google-cloud/cloud-sql-connector");
 const cors = require("cors");
 require("dotenv").config();
+const { Storage } = require('@google-cloud/storage');
 
 const app = express();
-const port = process.env.PORT; // Cloud Run will provide this port
+const port = process.env.PORT || 8080; // Cloud Run will provide this port
 
 app.use(cors());
 
@@ -38,6 +39,35 @@ async function initializeDbPool() {
 initializeDbPool().catch(err => {
   console.error('Failed to connect to DB:', err);
   process.exit(1);
+});
+
+// Initialize Google Cloud Storage client
+const storage = new Storage({
+  // Use default service account credentials
+  projectId: 'plus-percent',
+});
+
+// Endpoint to list files in your bucket
+app.get('/gcs-files', async (req, res) => {
+  try {
+    const [files] = await storage.bucket('20pluspercentpricedata').getFiles();
+    res.json(files.map(file => file.name));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint to download a file from your bucket
+app.get('/gcs-file', async (req, res) => {
+  const { filename } = req.query;
+  if (!filename) return res.status(400).json({ error: 'Filename required' });
+
+  const bucket = storage.bucket('20pluspercentpricedata');
+  const file = bucket.file(filename);
+
+  file.createReadStream()
+    .on('error', err => res.status(500).json({ error: err.message }))
+    .pipe(res);
 });
 
 function isSafeTableName(name) {
