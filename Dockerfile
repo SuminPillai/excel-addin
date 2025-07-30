@@ -1,4 +1,4 @@
-FROM node:18-alpine
+ROM node:18-alpine
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Copy application code and service account key
 COPY . .
@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8080
 
 # Start the application
-CMD ["node", "servercopy.js"] 
+CMD ["node", "server.js"]
