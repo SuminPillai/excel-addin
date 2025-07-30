@@ -9,6 +9,8 @@ npm-debug.log*
 
 # Google Cloud credentials
 gcs-key.json
+!package.json
+!package-lock.json
 *.json
 
 # Logs
