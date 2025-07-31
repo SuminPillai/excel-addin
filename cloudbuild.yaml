@@ -4,14 +4,14 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$SHORT_SHA'
+      - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$BUILD_ID'
       - '.'
 
   # 2. Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$SHORT_SHA'
+      - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$BUILD_ID'
 
   # 3. Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -21,15 +21,23 @@ steps:
       - 'run'
       - 'deploy'
       - 'excel-addin-backend'
-      - '--image=asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$SHORT_SHA'
+      - '--image=asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$BUILD_ID'
       - '--region=asia-south1'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--health-check-path=/healthz'
+      # Use a startup probe to ensure the container is fully initialized (DB connected) before receiving traffic.
+      - '--startup-probe=http-get-path=/healthz'
+      # Use a liveness probe to ensure the container remains healthy after startup.
+      - '--liveness-probe=http-get-path=/healthz'
+      # Set each environment variable with its own flag for clarity and to avoid parsing issues with spaces.
       - '--set-env-vars=INSTANCE_CONNECTION_NAME=plus-percent:asia-south1:excel-addin-db'
-      - '--set-env-vars=DB_NAME=Price data'
+      # For the variable with a space, pass the flag and value as separate arguments.
+      # This is the most robust way to handle values with spaces.
+      - '--set-env-vars'
+      - 'DB_NAME=Price data'
       - '--set-env-vars=DB_USER=sqlserver'
+      - '--set-env-vars=GCS_BUCKET_NAME=20pluspercentpricedata'
       - '--update-secrets=DB_PASS=excel-db-pass:latest'
 
 images:
-  - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$SHORT_SHA'
+  - 'asia-south1-docker.pkg.dev/${PROJECT_ID}/excel-addin-backend-repo/excel-addin-backend:$BUILD_ID'
