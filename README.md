@@ -1,36 +1,111 @@
-# Excel Add-in Backend
+<div align="center">
 
-This is the backend service for the Excel Add-in that provides access to stock data stored in Google Cloud Storage.
+# 📈 StockData Excel Add-in
+
+**Microsoft Excel task pane add-in for real-time stock data access powered by Google Cloud**
+
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Cloud Run](https://img.shields.io/badge/Cloud_Run-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)
+![License](https://img.shields.io/badge/License-Private-red?style=for-the-badge)
+
+</div>
+
+---
+
+## Overview
+
+A backend service for a Microsoft Excel Add-in that provides seamless access to stock market data stored in Google Cloud Storage. Opens as a **task pane** inside Excel, allowing users to fetch historical price data, financial metrics, and technical indicators — directly into their spreadsheets.
+
+## Architecture
+
+```mermaid
+graph LR
+    A[Excel Task Pane] -->|REST API| B[Cloud Run Backend]
+    B -->|Read| C[Google Cloud Storage]
+    B -->|Query| D[Cloud SQL]
+    C -->|Return| A
+    D -->|Return| A
+```
 
 ## Features
 
-- REST API endpoints for stock data access
-- Google Cloud Storage integration
-- CORS enabled for Excel Add-in communication
-- Cloud Run deployment ready
+- 📊 **In-Excel Data Access** — Fetch stock data without leaving your spreadsheet
+- 🔌 **REST API Backend** — Clean, fast API endpoints for data retrieval
+- ☁️ **Google Cloud Integration** — Leverages GCS for data storage and Cloud Run for compute
+- 🔒 **CORS Enabled** — Secure cross-origin communication with the Excel client
+- 🚀 **Cloud Run Deployment** — Serverless, auto-scaling backend infrastructure
 
 ## API Endpoints
 
-- `GET /stocks` - Get stock data with parameters: symbol, from, to, columns
-- `GET /gcs-files` - List files in Google Cloud Storage bucket
-- `GET /gcs-file` - Download a specific file from bucket (requires filename parameter)
+| Endpoint | Method | Description | Parameters |
+|----------|--------|-------------|------------|
+| `/stocks` | `GET` | Fetch stock price data | `symbol`, `from`, `to`, `columns` |
+| `/gcs-files` | `GET` | List available data files | — |
+| `/gcs-file` | `GET` | Download a specific data file | `filename` |
 
-## Environment Variables
+## Tech Stack
 
-- `PORT` - Server port (default: 8080)
-- `GOOGLE_APPLICATION_CREDENTIALS` - Path to service account key file
+| Component | Technology |
+|-----------|-----------|
+| Runtime | Node.js |
+| Language | JavaScript |
+| Cloud | Google Cloud Platform |
+| Compute | Google Cloud Run |
+| Storage | Google Cloud Storage |
+| Database | Google Cloud SQL (SQL Server) |
 
-## Deployment
+## Getting Started
 
-This service is designed to be deployed on Google Cloud Run.
+### Prerequisites
+- Node.js 18+
+- Google Cloud SDK
+- GCP service account credentials
 
-## Local Development
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/SuminPillai/stockdata-excel-addin.git
+cd stockdata-excel-addin
+
+# Install dependencies
 npm install
+
+# Set environment variables
+export PORT=8080
+export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
+
+# Start the server
 npm start
 ```
 
-## License
+### Deployment
 
-Private - For internal use only 
+This service is designed for deployment on **Google Cloud Run**:
+
+```bash
+gcloud run deploy stockdata-excel-addin \
+  --source . \
+  --region asia-south1 \
+  --allow-unauthenticated
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `8080` |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to GCP service account key | — |
+
+## Related Projects
+
+- [**NSE Stock Data Pipeline**](https://github.com/SuminPillai/nse-stock-data-pipeline) — Upstream data ETL pipeline
+- [**StockData Google Sheets Add-on**](https://github.com/SuminPillai/stockdata-google-sheets-addon) — Google Sheets version
+- [**StockData WebApp**](https://github.com/SuminPillai/stockdata-webapp) — Web interface
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by <a href="https://github.com/SuminPillai">Sumin Pillai</a> · <a href="https://alphaquantixanalytics.com">AlphaQuantix Analytics</a></p>
+</div>
